@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lotería Animalitos</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .animal { display: inline-block; margin: 5px; padding: 10px; border: 1px solid #000; cursor: pointer; }
+    .seleccionado { background-color: #ffd700; }
+  </style>
+</head>
+<body>
+  <h2>🎯 Lotería Animalitos</h2>
+  <div id="animalitos"></div>
+  <p>Monto (RD$): <input type="number" id="apuesta" /></p>
+  <button onclick="apostar()">Apostar</button>
+  <p id="resultado"></p>
+  <button onclick="imprimirTicket()">🖨️ Imprimir apuesta</button>
+
+  <div id="ticket" style="display:none; font-family:monospace;">
+    <h2 style="text-align:center;">🎟️ Ticket de Apuesta</h2>
+    <p><b>N° Ticket:</b> <span id="ticketSerie"></span></p>
+    <p><b>Animalito:</b> <span id="ticketAnimal"></span></p>
+    <p><b>Apuesta:</b> RD$<span id="ticketMonto"></span></p>
+    <p><b>Resultado:</b> <span id="ticketResultado"></span></p>
+    <p><b>Fecha:</b> <span id="ticketFecha"></span></p>
+    <div style="text-align:center; margin-top:10px;">
+      <canvas id="qrTicket"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const animalitos = ["Tigre", "Gato", "Perro", "Elefante", "Zorro", "León", "Conejo", "Oso"];
+    let seleccionUsuario = null;
+    let ticketCounter = 1;
+
+    const contenedor = document.getElementById("animalitos");
+    animalitos.forEach(a => {
+      const div = document.createElement("div");
+      div.className = "animal";
+      div.innerText = a;
+      div.onclick = () => {
+        document.querySelectorAll('.animal').forEach(el => el.classList.remove('seleccionado'));
+        div.classList.add("seleccionado");
+        seleccionUsuario = a;
+      };
+      contenedor.appendChild(div);
+    });
+
+    function apostar() {
+      const monto = parseInt(document.getElementById("apuesta").value);
+      if (!seleccionUsuario || !monto) {
+        alert("Selecciona un animal y un monto.");
+        return;
+      }
+      const ganador = animalitos[Math.floor(Math.random() * animalitos.length)];
+      const resultado = seleccionUsuario === ganador ? `🎉 ¡Ganaste RD$${monto * 2}!` : `😢 Perdiste RD$${monto}. El ganador fue ${ganador}.`;
+      document.getElementById("resultado").innerText = resultado;
+    }
+
+    function imprimirTicket() {
+      const monto = parseInt(document.getElementById("apuesta").value);
+      const resultadoTexto = document.getElementById("resultado").innerText;
+      if (!seleccionUsuario || !monto || resultadoTexto === "") {
+        alert("Primero debes hacer una apuesta válida.");
+        return;
+      }
+      const fecha = new Date().toLocaleString();
+      const numeroSerie = "XT-" + String(ticketCounter).padStart(5, '0');
+      document.getElementById("ticketSerie").textContent = numeroSerie;
+      document.getElementById("ticketAnimal").textContent = seleccionUsuario;
+      document.getElementById("ticketMonto").textContent = monto;
+      document.getElementById("ticketResultado").textContent = resultadoTexto;
+      document.getElementById("ticketFecha").textContent = fecha;
+      const urlBase = "https://mikistar.github.io/loteria-animalitos/ticket.html";
+      const params = new URLSearchParams({
+        serie: numeroSerie, animal: seleccionUsuario,
+        monto: monto, resultado: resultadoTexto, fecha: fecha
+      });
+      const qrLink = `${urlBase}?${params.toString()}`;
+      new QRious({
+        element: document.getElementById("qrTicket"),
+        size: 150,
+        value: qrLink
+      });
+      ticketCounter++;
+      const ticketDiv = document.getElementById("ticket");
+      const ventana = window.open('', '', 'width=400,height=600');
+      ventana.document.write('<html><head><title>Ticket</title></head><body>');
+      ventana.document.write(ticketDiv.innerHTML);
+      ventana.document.write('</body></html>');
+      ventana.document.close();
+      ventana.print();
+    }
+  </script>
+</body>
+</html>

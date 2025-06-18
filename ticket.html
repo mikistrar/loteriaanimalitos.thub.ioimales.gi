@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket de Apuesta</title>
+</head>
+<body style="font-family:monospace;">
+  <h2>🎟️ Ticket Detallado</h2>
+  <p><b>N° Ticket:</b> <span id="serie"></span></p>
+  <p><b>Animalito:</b> <span id="animal"></span></p>
+  <p><b>Apuesta:</b> RD$<span id="monto"></span></p>
+  <p><b>Resultado:</b> <span id="resultado"></span></p>
+  <p><b>Fecha:</b> <span id="fecha"></span></p>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("serie").textContent = params.get("serie");
+    document.getElementById("animal").textContent = params.get("animal");
+    document.getElementById("monto").textContent = params.get("monto");
+    document.getElementById("resultado").textContent = params.get("resultado");
+    document.getElementById("fecha").textContent = params.get("fecha");
+  </script>
+</body>
+</html>
